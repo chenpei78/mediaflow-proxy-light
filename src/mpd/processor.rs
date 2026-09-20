@@ -159,6 +159,13 @@ pub fn parse_mpd_document(
 
         let period_avail_start = availability_start_unix.unwrap_or(0.0) + period_start_sec;
 
+        // 取出 Period 级 BaseURL
+        let period_base = period
+            .base_url
+            .as_ref()
+            .and_then(|b| b.value.as_deref())
+            .unwrap_or("");
+
         for adaptation in &period.adaptation_sets {
             for representation in &adaptation.representations {
                 if let Some(profile) = parse_representation(
@@ -349,21 +356,26 @@ fn parse_representation(
 
     // Combine: AdaptationSet BaseURL + Representation BaseURL
     // e.g. "8/" + "" → "8/"
-    let base_url_str = if !rep_base.is_empty() {
-        if adapt_base.is_empty() {
-            rep_base.to_string()
+
+let mut combined = String::new();
+    if !period_base_url.is_empty() {
+        combined.push_str(period_base_url);
+    }
+    if !adapt_base.is_empty() {
+        if adapt_base.starts_with("http://") || adapt_base.starts_with("https://") {
+            combined = adapt_base.to_string();
         } else {
-            // If rep_base is absolute, it wins; otherwise concatenate
-            if rep_base.starts_with("http://") || rep_base.starts_with("https://") {
-                rep_base.to_string()
-            } else {
-                format!("{adapt_base}{rep_base}")
-            }
+            combined.push_str(adapt_base);
         }
-    } else {
-        adapt_base.to_string()
-    };
-    let base_url_str = base_url_str.as_str();
+    }
+    if !rep_base.is_empty() {
+        if rep_base.starts_with("http://") || rep_base.starts_with("https://") {
+            combined = rep_base.to_string();
+        } else {
+            combined.push_str(rep_base);
+        }
+    }
+    let base_url_str = combined.as_str();
 
     // Compute initUrl from template / list / base even when not fully parsing segments
     // Use rep_id (raw XML id) for $RepresentationID$ template expansion, not the unique profile id.
