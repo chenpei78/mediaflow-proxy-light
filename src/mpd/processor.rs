@@ -172,6 +172,7 @@ pub fn parse_mpd_document(
                     time_shift_buffer_depth_sec,
                     media_presentation_duration_sec,
                     parse_segment_profile_id,
+                    period_base,   // 新增传入
                 ) {
                     profiles.push(profile);
                 }
@@ -206,6 +207,7 @@ fn parse_representation(
     time_shift_buffer_depth_sec: f64,
     media_presentation_duration_sec: Option<f64>,
     parse_segment_profile_id: Option<&str>,
+    period_base_url: &str,   // 新增
 ) -> Option<MpdProfile> {
     // MIME type - prefer representation, fall back to adaptation set
     let mime_type = rep
@@ -331,12 +333,37 @@ fn parse_representation(
         (1, false, 1)
     };
 
-    // Base URL (may be a relative path prefix inside the representation)
-    let base_url_str = rep
+    // Base URL inheritance: Representation > AdaptationSet > (Period/MPD handled by caller)
+    // For now collect from AdaptationSet + Representation.
+    // Note: Period-level BaseURL is passed in via an extended call chain below.
+    let adapt_base = adaptation
         .base_url
         .as_ref()
         .and_then(|b| b.value.as_deref())
         .unwrap_or("");
+    let rep_base = rep
+        .base_url
+        .as_ref()
+        .and_then(|b| b.value.as_deref())
+        .unwrap_or("");
+
+    // Combine: AdaptationSet BaseURL + Representation BaseURL
+    // e.g. "8/" + "" → "8/"
+    let base_url_str = if !rep_base.is_empty() {
+        if adapt_base.is_empty() {
+            rep_base.to_string()
+        } else {
+            // If rep_base is absolute, it wins; otherwise concatenate
+            if rep_base.starts_with("http://") || rep_base.starts_with("https://") {
+                rep_base.to_string()
+            } else {
+                format!("{adapt_base}{rep_base}")
+            }
+        }
+    } else {
+        adapt_base.to_string()
+    };
+    let base_url_str = base_url_str.as_str();
 
     // Compute initUrl from template / list / base even when not fully parsing segments
     // Use rep_id (raw XML id) for $RepresentationID$ template expansion, not the unique profile id.
