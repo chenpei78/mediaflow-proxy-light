@@ -38,6 +38,9 @@ pub struct MpdDocument {
 
     #[serde(rename = "Period", default)]
     pub periods: Vec<Period>,
+
+    #[serde(rename = "BaseURL", default)]
+    pub base_url: Option<BaseUrl>,
 }
 
 // ---------------------------------------------------------------------------
@@ -56,6 +59,9 @@ pub struct Period {
     /// ISO 8601 duration for the period duration.
     #[serde(rename = "@duration", default)]
     pub duration: Option<String>,
+
+    #[serde(rename = "BaseURL", default)]
+    pub base_url: Option<BaseUrl>,
 
     #[serde(rename = "AdaptationSet", default)]
     pub adaptation_sets: Vec<AdaptationSet>,
@@ -108,6 +114,9 @@ pub struct AdaptationSet {
 
     #[serde(rename = "ContentProtection", default)]
     pub content_protection: Vec<ContentProtection>,
+
+    #[serde(rename = "BaseURL", default)]
+    pub base_url: Option<BaseUrl>,
 
     #[serde(rename = "Representation", default)]
     pub representations: Vec<Representation>,
