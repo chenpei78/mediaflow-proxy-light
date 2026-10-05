@@ -12,7 +12,7 @@ use crate::mpd::parser::{
     AdaptationSet, ContentProtection, MpdDocument, Representation, SegmentBase, SegmentList,
     SegmentTemplate,
 };
-use crate::mpd::segment::{expand_template, resolve_url};
+use crate::mpd::segment::{expand_template, resolve_url, resolve_url_with_query};
 use crate::mpd::timeline::{
     generate_live_segments, generate_vod_segments, parse_datetime_to_unix, parse_duration,
     preprocess_timeline, TimelineEntry,
