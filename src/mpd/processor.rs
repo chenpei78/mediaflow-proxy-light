@@ -727,7 +727,7 @@ fn compute_init_url(
             } else {
                 expanded
             };
-            return (Some(resolve_url(mpd_url, &path)), None);
+           return (Some(resolve_url_with_query(mpd_url, &path)), None);
         }
     }
 
@@ -739,7 +739,7 @@ fn compute_init_url(
     if let Some(list) = seg_list {
         if let Some(init) = &list.initialization {
             if let Some(source_url) = init.source_url.as_deref() {
-                return (Some(resolve_url(mpd_url, source_url)), None);
+               return (Some(resolve_url_with_query(mpd_url, source_url)), None);
             }
             if let Some(range) = init.range.as_deref() {
                 let base = rep
@@ -747,7 +747,7 @@ fn compute_init_url(
                     .as_ref()
                     .and_then(|b| b.value.as_deref())
                     .unwrap_or("");
-                return (Some(resolve_url(mpd_url, base)), Some(range.to_string()));
+               return (Some(resolve_url_with_query(mpd_url, base)), Some(range.to_string()));
             }
         }
     }
@@ -771,7 +771,7 @@ fn compute_init_url(
         .and_then(|b| b.value.as_deref())
         .unwrap_or("");
     if !base.is_empty() {
-        return (Some(resolve_url(mpd_url, base)), None);
+       return (Some(resolve_url_with_query(mpd_url, base)), None);
     }
 
     (None, None)
