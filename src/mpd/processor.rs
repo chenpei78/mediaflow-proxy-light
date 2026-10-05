@@ -824,7 +824,7 @@ fn extract_drm_info(cps: &[ContentProtection], mpd_url: &str) -> DrmInfo {
     // Resolve relative LA URL
     if let Some(la) = info.la_url.as_deref() {
         if !la.starts_with("http://") && !la.starts_with("https://") {
-            let resolved = resolve_url_with_query(mpd_url, la);
+            let resolved = resolve_url(mpd_url,la);
             info.la_url = Some(resolved);
         }
     }
