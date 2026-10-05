@@ -34,6 +34,30 @@ pub fn resolve_url(base_url: &str, relative: &str) -> String {
     }
 }
 
+
+/// Append the query string from `source_url` onto `target_url`.
+/// Used so MPD auth tokens (e.g. ?auth=JWT) are inherited by init/segment URLs.
+pub fn append_query_from(source_url: &str, target_url: String) -> String {
+    let Some((_, query)) = source_url.split_once('?') else {
+        return target_url;
+    };
+    if query.is_empty() {
+        return target_url;
+    }
+    if target_url.contains('?') {
+        format!("{target_url}&{query}")
+    } else {
+        format!("{target_url}?{query}")
+    }
+}
+
+/// Resolve a relative URL against the MPD URL, then inherit the MPD query string.
+pub fn resolve_url_with_query(mpd_url: &str, relative: &str) -> String {
+    let resolved = resolve_url(mpd_url, relative);
+    append_query_from(mpd_url, resolved)
+}
+
+
 // ---------------------------------------------------------------------------
 // Template variable expansion
 // ---------------------------------------------------------------------------
