@@ -573,7 +573,7 @@ fn timeline_entry_to_segment(
     } else {
         expanded
     };
-    let media_url = resolve_url(mpd_url, &media_path);
+    let media_url = resolve_url_with_query(mpd_url, &media_path);
 
     let extinf = if let (Some(start), Some(end)) = (entry.start_unix, entry.end_unix) {
         end - start
@@ -638,9 +638,9 @@ fn generate_from_list(
         .enumerate()
         .filter_map(|(i, seg_url)| {
             let media_url = if let Some(media) = seg_url.media.as_deref() {
-                resolve_url(mpd_url, media)
+                resolve_url_with_query(mpd_url, media)
             } else if !base_url.is_empty() {
-                resolve_url(mpd_url, base_url)
+                resolve_url_with_query(mpd_url, base_url)
             } else {
                 return None;
             };
@@ -672,7 +672,7 @@ fn generate_from_base(
         .as_ref()
         .and_then(|b| b.value.as_deref())
         .unwrap_or("");
-    let media_url = resolve_url(mpd_url, base_url);
+    let media_url = resolve_url_with_query(mpd_url, base_url);
 
     let extinf = total_duration_sec.unwrap_or(1.0).max(1.0);
     let init_range = base.initialization.as_ref().and_then(|i| i.range.clone());
@@ -759,7 +759,7 @@ fn compute_init_url(
             .as_ref()
             .and_then(|b| b.value.as_deref())
             .unwrap_or("");
-        let init_url = resolve_url(mpd_url, base);
+        let init_url = resolve_url_with_query(mpd_url, base);
         let init_range = sb.initialization.as_ref().and_then(|i| i.range.clone());
         return (Some(init_url), init_range);
     }
@@ -824,7 +824,7 @@ fn extract_drm_info(cps: &[ContentProtection], mpd_url: &str) -> DrmInfo {
     // Resolve relative LA URL
     if let Some(la) = info.la_url.as_deref() {
         if !la.starts_with("http://") && !la.starts_with("https://") {
-            let resolved = resolve_url(mpd_url, la);
+            let resolved = resolve_url_with_query(mpd_url, la);
             info.la_url = Some(resolved);
         }
     }
